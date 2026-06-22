@@ -7,6 +7,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Inspección">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-192.png">
 <title>Inspección Visual – GFST-SUPC</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -360,8 +362,10 @@ function cardHTML(item, idx) {
 
   const codsBodyHTML = codsOpen ? `
     <div class="cod-body">
-      <label class="sin-cod-label${item.sin_codigo?' active':''}" onclick="toggleSinCodigo('${item.id}')">
-        <input type="checkbox" ${item.sin_codigo?'checked':''} style="width:16px;height:16px;accent-color:#B91C1C;pointer-events:none">
+      <label class="sin-cod-label${item.sin_codigo?' active':''}">
+        <input type="checkbox" ${item.sin_codigo?'checked':''} 
+          style="width:16px;height:16px;accent-color:#B91C1C;cursor:pointer"
+          onchange="toggleSinCodigo('${item.id}')">
         <span style="font-size:13px;font-weight:600;color:${item.sin_codigo?'#B91C1C':'#374151'}">No se observa código / ilegible</span>
       </label>
       ${!item.sin_codigo ? SISTEMAS_CODIGO.map(s => `
@@ -650,24 +654,8 @@ document.querySelectorAll(".tab-btn").forEach(b => b.addEventListener("click", (
 // ─────────────────────────────────────────────
 // PWA – SERVICE WORKER
 // ─────────────────────────────────────────────
-const SW_SCRIPT = `
-const CACHE = "inspeccion-v1";
-const FILES = [location.pathname];
-self.addEventListener("install", e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
-});
-self.addEventListener("activate", e => {
-  e.waitUntil(clients.claim());
-});
-self.addEventListener("fetch", e => {
-  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).catch(() => caches.match(e.request))));
-});
-`;
-
 if ("serviceWorker" in navigator) {
-  const blob = new Blob([SW_SCRIPT], {type:"application/javascript"});
-  const swUrl = URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl).catch(() => {});
+  navigator.serviceWorker.register("./sw.js").catch(() => {});
 }
 
 // ─────────────────────────────────────────────
